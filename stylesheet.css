@@ -289,6 +289,49 @@ a { color: var(--link); }
   box-shadow:0 4px 12px rgba(0,0,0,.1);
 }
 
+/* ---------- AI AGENT CHAT ---------- */
+#agent-chat{
+  width:260px;
+  max-height:320px;
+  display:flex;
+  flex-direction:column;
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+  overflow:hidden;
+  animation:fadeIn .3s ease-out;
+  margin-top:.5rem;
+}
+.chat-messages{
+  flex:1;
+  overflow-y:auto;
+  padding:.5rem .75rem;
+  font-size:.85rem;
+}
+.chat-msg{margin:.35rem 0;line-height:1.4}
+.chat-msg.user  {text-align:right;color:var(--text);}
+.chat-msg.ai    {text-align:left; color:var(--muted);}
+.chat-input{
+  display:flex;
+  border-top:1px solid rgba(0,0,0,.05);
+}
+.chat-input textarea{
+  all:unset;
+  flex:1;
+  padding:.6rem;
+  resize:none;
+  max-height:6rem;
+  overflow-y:auto;
+}
+.chat-input .send-btn{
+  all:unset;
+  cursor:pointer;
+  padding:.6rem .8rem;
+  color:var(--accent);
+  font-weight:bold;
+}
+.chat-input .send-btn:hover{opacity:.8;}
+
 /* fade-in keyframes */
 @keyframes fadeIn{
   from{opacity:0;transform:translateY(10px);}

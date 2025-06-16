@@ -375,7 +375,18 @@ document.addEventListener('DOMContentLoaded', () => {
         <li><button data-action="teach">Learn about teaching & courses</button></li>
         <li><button data-action="intro">Read short research intro</button></li>
         <li><button data-action="quote">Show an AI quote</button></li>
+        <li><button data-action="chat">Ask me anything</button></li> <!-- NEW -->
       </ul>
+
+      <!-- 💬 light chat UI -->
+      <div id="agent-chat" hidden>
+        <div class="chat-messages"></div>
+        <div class="chat-input">
+          <textarea rows="1" placeholder="Ask me about my research…"></textarea>
+          <button class="send-btn" aria-label="Send">➤</button>
+        </div>
+      </div>
+
       <p class="agent-quote" hidden></p>
     </div>
 
@@ -386,6 +397,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const avatar     = agent.querySelector('.agent-avatar');
   const menu       = agent.querySelector('.agent-menu');
   const quoteBox   = agent.querySelector('.agent-quote');
+  const chatBox     = document.getElementById('agent-chat');
+  const msgArea     = chatBox.querySelector('.chat-messages');
+  const input       = chatBox.querySelector('textarea');
+  const sendBtn     = chatBox.querySelector('.send-btn');
+
   const quotes = [
     "The future is already here — it's just not evenly distributed. – W. Gibson",
     "Intelligence is the ability to avoid doing work, yet getting the work done. – L. Hubbard",
@@ -393,27 +409,97 @@ document.addEventListener('DOMContentLoaded', () => {
     "The question is not can machines think, but can they dream?"
   ];
 
-  avatar.addEventListener('click', () => {
-    menu.classList.toggle('open');
-  });
+  /* ---------- helpers ---------- */
+  const append = (role, text) => {
+    const el = document.createElement('div');
+    el.className = `chat-msg ${role}`;
+    el.textContent = text;
+    msgArea.appendChild(el);
+    msgArea.scrollTop = msgArea.scrollHeight;
+  };
+
+  async function fetchLLMResponse(q){
+    const apiKey = window.AI_AGENT_API_KEY;      // ← set this for OpenRouter
+    /* ---------- helper for local rule-based reply ---------- */
+    const localReply = txt => {
+      txt = txt.toLowerCase();
+      if(/hi|hello|hey/.test(txt)) return "Hello! 👋 How can I help you with my research?";
+      if(/(paper|publication)/.test(txt)) return "You can scroll to the Research section for selected papers. Let me know if you want details on a specific one.";
+      if(/teach|course/.test(txt)) return "I regularly teach and guest-lecture at UCL. Scroll to the Teaching section for a list.";
+      if(/research|work|focus/.test(txt)) return "I study how to teach language models to code and reason in self-evolving environments.";
+      if(/email|contact/.test(txt)) return "Feel free to email me at zhengyan.shi.19@gmail.com.";
+      return "I'm a lightweight local bot. Try asking about my papers, teaching, or research!";
+    };
+
+    /* ---------- 1️⃣ OpenRouter if key present ---------- */
+    if (apiKey){
+      try{
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions',{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization':`Bearer ${apiKey}`
+          },
+          body:JSON.stringify({
+            model:"openai/gpt-3.5-turbo",
+            messages:[{role:"user",content:q}],
+            max_tokens:150
+          })
+        });
+        const data = await res.json();
+        const answer = data.choices?.[0]?.message?.content?.trim();
+        if (answer) return answer;
+      }catch{/* fall through to other options */}
+    }
+
+    /* ---------- 2️⃣ Free public endpoint (no key) ---------- */
+    try{
+      const url = `https://api.affiliateplus.xyz/api/chatbot?message=${encodeURIComponent(q)}&owner=zy&botname=ZyBot`;
+      const r   = await fetch(url);
+      if(r.ok){
+        const j = await r.json();
+        return j.message?.trim() || localReply(q);
+      }
+    }catch{/* ignore & fallback */ }
+
+    /* ---------- 3️⃣ Local rule-based ---------- */
+    return localReply(q);
+  }
+
+  /* ---------- UI interactions ---------- */
+  avatar.addEventListener('click',()=>menu.classList.toggle('open'));
 
   menu.addEventListener('click', e => {
-    if (e.target.tagName !== 'BUTTON') return;
-    const action = e.target.dataset.action;
-    menu.classList.remove('open');  // auto-close
-    quoteBox.hidden = true;
+    if(e.target.tagName!=='BUTTON') return;
+    const action=e.target.dataset.action;
+    menu.classList.remove('open');
+    quoteBox.hidden=true;
 
-    const scrollTo = id => document.getElementById(id)
-        .scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if(action==='chat'){ chatBox.hidden=!chatBox.hidden; input.focus(); return; }
 
-    if (action === 'pubs')  scrollTo('research');
-    if (action === 'teach') scrollTo('teaching-activities');
-    if (action === 'intro') window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (action === 'quote') {
-      quoteBox.textContent = quotes[Math.floor(Math.random()*quotes.length)];
-      quoteBox.hidden = false;
+    const scrollTo=id=>document.getElementById(id)
+        .scrollIntoView({behavior:'smooth',block:'start'});
+    if(action==='pubs')  scrollTo('research');
+    if(action==='teach') scrollTo('teaching-activities');
+    if(action==='intro') window.scrollTo({top:0,behavior:'smooth'});
+    if(action==='quote'){
+      quoteBox.textContent=quotes[Math.random()*quotes.length|0];
+      quoteBox.hidden=false;
     }
   });
+
+  const send = async()=>{
+    const q=input.value.trim();
+    if(!q) return;
+    append('user',q);
+    input.value=''; input.focus();
+    append('ai','…');                           // typing indicator
+    const typingEl = msgArea.lastChild;
+    const a=await fetchLLMResponse(q);
+    typingEl.textContent=a;
+  };
+  sendBtn.addEventListener('click',send);
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
 })();
     </script>
   </body>
