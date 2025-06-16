@@ -1,3 +1,24 @@
+/* ---------- base palette & fonts ---------- */
+:root{
+  --bg:#0d1117;
+  --card:#161b22;
+  --accent:#2f81f7;
+  --text:#c9d1d9;
+  --muted:#8b949e;
+  --radius:8px;
+  --font-sans:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'Roboto Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-sans);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
 /* latin-ext */
 @font-face {
   font-family: 'Lato';
@@ -133,3 +154,41 @@ h2 {
 span.highlight {
   background-color: #ffffd0;
 }
+
+/* ---------- typography ---------- */
+h1,h2,h3{color:var(--text);font-weight:700}
+h1.name{font-size:2.5rem;letter-spacing:-.5px}
+h2{margin:2rem 0 1rem}
+a{color:var(--accent);text-decoration:none}
+a:hover{opacity:.8}
+
+/* ---------- layout tweaks ---------- */
+main{padding:0 1rem}
+header table{width:100%}
+@media(max-width:600px){
+  header table{display:block}
+  header td{display:block;width:100%!important;text-align:center}
+}
+
+/* ---------- research paper cards ---------- */
+.paper{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:1.25rem;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.paper:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 24px rgba(0,0,0,.3);
+}
+.paper-image img{border-radius:var(--radius)}
+.paper h3{margin:0 0 .25rem}
+.authors,.publication,.links{color:var(--muted)}
+
+/* ---------- reveal animation ---------- */
+.reveal{opacity:0;transform:translateY(20px);transition:all .6s ease-out}
+.reveal.visible{opacity:1;transform:none}
+
+/* ---------- misc ---------- */
+.content-section{margin-top:3rem}
+.section-heading{margin-bottom:1rem}

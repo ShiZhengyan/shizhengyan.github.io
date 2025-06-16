@@ -15,6 +15,9 @@
     <!-- Visitor tracking script -->
     <script data-goatcounter="https://zhengyanshi.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
+    <!-- 1️⃣ Modern fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
   </head>
   
   <body>
@@ -89,7 +92,7 @@
           }
         </style>
         <div class="research-papers">
-          <article class="paper">
+          <article class="paper reveal">
             <div class="paper-image">
               <img src='asset/daa_likelihood.png' width="160" alt="Paper preview">
             </div>
@@ -112,7 +115,7 @@
             </div>
           </article>
 
-          <article class="paper">
+          <article class="paper reveal">
             <div class="paper-image">
               <img src='asset/insight_single.png' width="160" alt="Paper preview">
             </div>
@@ -140,7 +143,7 @@
             </div>
           </article>
       
-          <article class="paper">
+          <article class="paper reveal">
             <div class="paper-image">
               <img src='asset/dept.png' width="160" alt="Paper preview">
             </div>
@@ -163,7 +166,7 @@
             </div>
           </article>
       
-          <article class="paper">
+          <article class="paper reveal">
             <div class="paper-image">
               <img src='asset/preview.png' width="160" alt="Paper preview">
             </div>
@@ -187,7 +190,7 @@
             </div>
           </article>
       
-          <article class="paper">
+          <article class="paper reveal">
             <div class="paper-image">
               <img src='asset/tapt_impr_5.png' width="160" alt="Paper preview">
             </div>
@@ -213,7 +216,7 @@
             </div>
           </article>
       
-          <article class="paper">
+          <article class="paper reveal">
             <div class="paper-image">
               <img src='asset/chain_construction.png' width="160" alt="Paper preview">
             </div>
@@ -274,6 +277,7 @@
       </style>
       
       <script>
+        /* 2️⃣ Keep the small helper only once */
         function toggleImageVisibility(imageId) {
           const image = document.getElementById(imageId);
           image.style.opacity = image.style.opacity === "0" ? "1" : "0";
@@ -327,13 +331,18 @@
 
     </main>
     
+    <!-- 3️⃣ Reveal-on-scroll -->
     <script>
-      function toggleImageVisibility(imageId) {
-        const image = document.getElementById(imageId);
-        image.style.opacity = image.style.opacity === "0" ? "1" : "0";
-      }
+// filepath: inline-reveal-observer
+document.addEventListener('DOMContentLoaded', () => {
+  const elements = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver(
+    entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
+    { threshold: 0.1 }
+  );
+  elements.forEach(el => io.observe(el));
+});
     </script>
-
   </body>
 
 </html>
