@@ -192,3 +192,47 @@ header table{width:100%}
 /* ---------- misc ---------- */
 .content-section{margin-top:3rem}
 .section-heading{margin-bottom:1rem}
+
+/* ---------- THEME VARIABLES ---------- */
+:root {
+  --bg: #ffffff;
+  --text: #000000;
+  --link: #0366d6;
+  --card-bg: #f9f9f9;
+}
+.dark {
+  --bg: #121212;
+  --text: #e0e0e0;
+  --link: #8ab4f8;
+  --card-bg: #1e1e1e;
+}
+
+/* ---------- GLOBAL STYLES ---------- */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+a { color: var(--link); }
+
+/* paper card */
+.paper { background: var(--card-bg); border-radius: 6px; padding: 1rem; }
+
+/* theme toggle button */
+#theme-toggle{
+  position:fixed;top:1rem;right:1rem;
+  background:none;border:none;cursor:pointer;
+  font-size:1.25rem;color:var(--text);
+}
+
+/* ---------- MOBILE FIRST ---------- */
+@media(max-width:600px){
+  /* header two-column table becomes stacked */
+  header table, header tr, header td{display:block;width:100%!important;text-align:center!important;}
+  header td:first-child{margin-bottom:1rem;}
+
+  /* stack paper image above text */
+  .paper{flex-direction:column;align-items:center;}
+  .paper-image{margin-bottom:0.5rem;}
+}

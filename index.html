@@ -21,6 +21,8 @@
   </head>
   
   <body>
+    <!-- theme-switcher -->
+    <button id="theme-toggle" aria-label="Toggle dark / light">🌙</button>
     <main style="width:100%;max-width:800px;margin:0 auto;">
       <header style="padding:2.5%;">
         <table style="width:100%;border-spacing:0;">
@@ -35,38 +37,39 @@
                 Before that, I completed an MSc in Data Science (Statistics) with <i>Distinction</i> at UCL and a BSc in Mathematics with <i>First Class Honours</i> from the University of Liverpool and Xi'an Jiaotong-Liverpool University. 
                 I have also held research internships at Cohere (London) and Amazon (London & Seattle).
               </p>
-              <!-- <p>
-                Prior to pursuing my PhD, I obtained a Master's degree in Data Science (Statistics) with <i>Distinction</i> from University College London and a Bachelor's degree in Mathematics with <i>First Class Honor</i> from University of Liverpool and Xi'an Jiaotong-Liverpool University. 
-              </p> -->
+              <p>
+                <!-- Prior to pursuing my PhD, I obtained a Master's degree in Data Science (Statistics) with <i>Distinction</i> from University College London and a Bachelor's degree in Mathematics with <i>First Class Honor</i> from University of Liverpool and Xi'an Jiaotong-Liverpool University.  -->
+              </p>
+              <br>
               <p>
                 My current research at MSR focuses on teaching language models (LMs) to code. 
                 I build learning loops in which LMs not only act but also reason within scalable, self-evolving environments. 
                 By allowing models to plan, converse, and iterate inside these realistic sandboxes, I explore how LMs can continually refine themselves through interaction. 
                 Central to my work is the ambition to leverage language models <strong>efficiently</strong> and <strong>robustly</strong> to solve <strong>general</strong> tasks.
                 To that end, my existing work can be broadly categorized into the following directions:
-                <ul>
-                  <li>
-                    <strong>Language Model Post-training</strong> 
-                    [
-                    <a href="https://arxiv.org/abs/2410.11677">Preprint 2024</a>,
-                    <a href="https://nips.cc/virtual/2024/poster/95892">NeurIPS 2024</a>,
-                    <a href="https://arxiv.org/abs/2309.05173">ICLR 2024</a>,
-                    <a href="https://openreview.net/forum?id=s7xWeJQACI">NeurIPS 2023</a>,
-                    <a href="https://aclanthology.org/2023.findings-acl.347/">Findings of ACL 2023</a>
-                    ]
-                  </li>
-                  <li>
-                    <strong>Interactive Systems</strong>
-                    [
-                    <a href="https://link.springer.com/chapter/10.1007/978-3-031-56027-9_1">ECIR 2024</a>,
-                    <a href="https://aclanthology.org/2023.findings-emnlp.22/">Findings of EMNLP 2023</a>,
-                    <a href="https://ojs.aaai.org/index.php/AAAI/article/view/21383">AAAI 2022</a>, 
-                    <a href="https://aclanthology.org/2022.findings-naacl.158">Findings of NAACL 2022</a>,
-                    <a href="https://nips.cc/virtual/2022/66405">NeurIPS WS 2022</a>
-                    ]
-                  </li>
-                </ul>
-              </p>
+              </p> <!-- close paragraph before the list -->
+              <ul style="margin-left:1.5em;">
+                <li>
+                  <strong>Language Model Post-training</strong> 
+                  [
+                  <a href="https://arxiv.org/abs/2410.11677">Preprint 2024</a>,
+                  <a href="https://nips.cc/virtual/2024/poster/95892">NeurIPS 2024</a>,
+                  <a href="https://arxiv.org/abs/2309.05173">ICLR 2024</a>,
+                  <a href="https://openreview.net/forum?id=s7xWeJQACI">NeurIPS 2023</a>,
+                  <a href="https://aclanthology.org/2023.findings-acl.347/">Findings of ACL 2023</a>
+                  ]
+                </li>
+                <li>
+                  <strong>Interactive Systems</strong>
+                  [
+                  <a href="https://link.springer.com/chapter/10.1007/978-3-031-56027-9_1">ECIR 2024</a>,
+                  <a href="https://aclanthology.org/2023.findings-emnlp.22/">Findings of EMNLP 2023</a>,
+                  <a href="https://ojs.aaai.org/index.php/AAAI/article/view/21383">AAAI 2022</a>, 
+                  <a href="https://aclanthology.org/2022.findings-naacl.158">Findings of NAACL 2022</a>,
+                  <a href="https://nips.cc/virtual/2022/66405">NeurIPS WS 2022</a>
+                  ]
+                </li>
+              </ul>
               <p style="text-align:center">
                 <a href="https://scholar.google.com/citations?user=TF8l2ZEAAAAJ">Google Scholar</a> &nbsp;/&nbsp;
                 <a href="https://twitter.com/Zhengyan_Shi">Twitter</a> &nbsp;/&nbsp;
@@ -330,8 +333,8 @@
       </style>
 
     </main>
-    
-    <!-- 3️⃣ Reveal-on-scroll -->
+
+    <!-- 3️⃣ Reveal-on-scroll (unchanged) -->
     <script>
 // filepath: inline-reveal-observer
 document.addEventListener('DOMContentLoaded', () => {
@@ -342,6 +345,26 @@ document.addEventListener('DOMContentLoaded', () => {
   );
   elements.forEach(el => io.observe(el));
 });
+    </script>
+
+    <!-- 4️⃣ Theme initialisation & persistence -->
+    <script>
+// filepath: inline-theme-toggle
+(function () {
+  const root = document.documentElement;
+  const btn  = document.getElementById('theme-toggle');
+  const saved = localStorage.getItem('theme');
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (saved === 'dark' || (!saved && systemDark)) {
+    root.classList.add('dark');
+    btn.textContent = '☀️';
+  }
+  btn.addEventListener('click', () => {
+    const dark = root.classList.toggle('dark');
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+    btn.textContent = dark ? '☀️' : '🌙';
+  });
+})();
     </script>
   </body>
 
