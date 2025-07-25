@@ -79,7 +79,7 @@
               </p>
             </td>
             <td style="width:40%;max-width:40%;text-align:center;">
-              <a href="asset/zhengyans.jpeg"><img style="width:75%;max-width:75%;border-radius:50%" alt="Profile photo" src="asset/zhengyans.jpeg"></a>
+              <a href="asset/zhengyans.jpeg"><img style="width:75%;max-width:75%;border-radius:50%" alt="Zhengyan Shi - Senior Researcher at Microsoft Research" src="asset/zhengyans.jpeg" loading="lazy"></a>
             </td>
           </tr>
         </table>
@@ -316,6 +316,28 @@
           </li>
         </ul>
       </section>
+
+      <section id="news" class="content-section reveal">
+        <h2 class="section-heading">Recent News</h2>
+        <div class="news-container">
+          <div class="news-item">
+            <span class="news-date">2024/10</span>
+            <span class="news-content">New preprint on likelihood over-optimisation in direct alignment algorithms is now available on <a href="https://arxiv.org/abs/2410.11677">arXiv</a>.</span>
+          </div>
+          <div class="news-item">
+            <span class="news-date">2024/09</span>
+            <span class="news-content">Paper on "Instruction Tuning With Loss Over Instructions" accepted to <strong>NeurIPS 2024</strong>!</span>
+          </div>
+          <div class="news-item">
+            <span class="news-date">2024/01</span>
+            <span class="news-content">Paper on "DePT: Decomposed Prompt Tuning" accepted to <strong>ICLR 2024</strong>!</span>
+          </div>
+          <div class="news-item">
+            <span class="news-date">2023/09</span>
+            <span class="news-content">Paper accepted to <strong>NeurIPS 2023</strong> on powerful prompt-based fine-tuning!</span>
+          </div>
+        </div>
+      </section>
       
       <section id="academic-services" class="content-section">
         <h2 class="section-heading">Academic Services</h2>
@@ -366,6 +388,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 })();
     </script>
+
+    <!-- 🧑‍🚀 Floating Astronaut Explorer -->
+    <div class="floating-astronaut" id="astronaut">🧑‍🚀</div>
+    <div class="background-stars"></div>
+    
+    <!-- 🎮 Subtle instructions tooltip -->
+    <div id="astronaut-hint" class="astronaut-hint">
+      <span>Use arrow keys to move the astronaut! 🧑‍🚀</span>
+    </div>
 
     <!-- 🧑‍🔬 Lightweight AI research agent -->
     <div id="ai-agent" class="reveal">
@@ -419,51 +450,117 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   async function fetchLLMResponse(q){
-    const apiKey = window.AI_AGENT_API_KEY;      // ← set this for OpenRouter
-    /* ---------- helper for local rule-based reply ---------- */
-    const localReply = txt => {
-      txt = txt.toLowerCase();
-      if(/hi|hello|hey/.test(txt)) return "Hello! 👋 How can I help you with my research?";
-      if(/(paper|publication)/.test(txt)) return "You can scroll to the Research section for selected papers. Let me know if you want details on a specific one.";
-      if(/teach|course/.test(txt)) return "I regularly teach and guest-lecture at UCL. Scroll to the Teaching section for a list.";
-      if(/research|work|focus/.test(txt)) return "I study how to teach language models to code and reason in self-evolving environments.";
-      if(/email|contact/.test(txt)) return "Feel free to email me at zhengyan.shi.19@gmail.com.";
-      return "I'm a lightweight local bot. Try asking about my papers, teaching, or research!";
-    };
+    /* ---------- Enhanced context about Zhengyan Shi ---------- */
+    const contextPrompt = `You are an AI assistant representing Zhengyan Shi, a Senior Researcher at Microsoft Research. Here's information about him:
 
-    /* ---------- 1️⃣ OpenRouter if key present ---------- */
-    if (apiKey){
-      try{
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions',{
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'Authorization':`Bearer ${apiKey}`
-          },
-          body:JSON.stringify({
-            model:"openai/gpt-3.5-turbo",
-            messages:[{role:"user",content:q}],
-            max_tokens:150
-          })
+BACKGROUND:
+- Senior Researcher at Microsoft Research (MSR)
+- PhD in Computer Science from University College London (UCL)
+- MSc in Data Science (Statistics) with Distinction from UCL
+- BSc in Mathematics with First Class Honours from University of Liverpool and Xi'an Jiaotong-Liverpool University
+- Research internships at Cohere (London) and Amazon (London & Seattle)
+
+RESEARCH FOCUS:
+- Teaching language models (LMs) to code
+- Building learning loops where LMs act and reason in scalable, self-evolving environments
+- Language model post-training and instruction tuning
+- Interactive systems and prompt-based fine-tuning
+- Making language models work efficiently, robustly, and generally
+
+RECENT WORK:
+- "Understanding Likelihood Over-optimisation in Direct Alignment Algorithms" (2024 preprint)
+- "Instruction Tuning With Loss Over Instructions" (NeurIPS 2024)
+- "DePT: Decomposed Prompt Tuning for Parameter-Efficient Fine-tuning" (ICLR 2024)
+- "Don't Stop Pretraining? Make Prompt-based Fine-tuning Powerful Learner" (NeurIPS 2023)
+
+Question: ${q}
+
+Please respond as if you're an AI assistant representing Zhengyan, providing helpful information about his research, background, or related topics. Keep responses concise (1-3 sentences) and friendly.`;
+
+    /* ---------- Multiple free LLM APIs ---------- */
+    const apis = [
+      // Hugging Face Inference API (free tier)
+      {
+        url: 'https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs: contextPrompt })
+      },
+      
+      // Alternative free API
+      {
+        url: `https://api.affiliateplus.xyz/api/chatbot?message=${encodeURIComponent(contextPrompt)}&owner=zhengyan&botname=ResearchBot`
+      },
+      
+      // Another free option
+      {
+        url: 'https://api.cohere.ai/v1/generate',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'command-light',
+          prompt: contextPrompt,
+          max_tokens: 200,
+          temperature: 0.7
+        })
+      }
+    ];
+
+    /* ---------- Try multiple APIs ---------- */
+    for (const api of apis) {
+      try {
+        const response = await fetch(api.url, {
+          method: api.body ? 'POST' : 'GET',
+          headers: api.headers || {},
+          body: api.body
         });
-        const data = await res.json();
-        const answer = data.choices?.[0]?.message?.content?.trim();
-        if (answer) return answer;
-      }catch{/* fall through to other options */}
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Handle different response formats
+          let answer = '';
+          if (data.generated_text) answer = data.generated_text;
+          else if (data.message) answer = data.message;
+          else if (data.generations?.[0]?.text) answer = data.generations[0].text;
+          else if (Array.isArray(data) && data[0]?.generated_text) answer = data[0].generated_text;
+          
+          if (answer && answer.trim()) {
+            return answer.trim().substring(0, 300); // Limit response length
+          }
+        }
+      } catch (error) {
+        console.log('API attempt failed, trying next...');
+        continue;
+      }
     }
 
-    /* ---------- 2️⃣ Free public endpoint (no key) ---------- */
-    try{
-      const url = `https://api.affiliateplus.xyz/api/chatbot?message=${encodeURIComponent(q)}&owner=zy&botname=ZyBot`;
-      const r   = await fetch(url);
-      if(r.ok){
-        const j = await r.json();
-        return j.message?.trim() || localReply(q);
-      }
-    }catch{/* ignore & fallback */ }
-
-    /* ---------- 3️⃣ Local rule-based ---------- */
-    return localReply(q);
+    /* ---------- Enhanced local rule-based responses ---------- */
+    const txt = q.toLowerCase();
+    
+    if(/hi|hello|hey|greet/.test(txt)) {
+      return "Hello! 👋 I'm here to help you learn about Zhengyan's research in language models and AI. What would you like to know?";
+    }
+    
+    if(/(paper|publication|research|work)/.test(txt)) {
+      return "Zhengyan focuses on teaching language models to code and reason. His recent work includes instruction tuning (NeurIPS 2024), DePT for efficient fine-tuning (ICLR 2024), and likelihood over-optimization in alignment algorithms. Which area interests you most?";
+    }
+    
+    if(/teach|course|education/.test(txt)) {
+      return "Zhengyan teaches at UCL including Applied AI, Machine Learning for Data Science, and Statistical NLP. He also co-supervises MSc research projects. Are you interested in any specific course?";
+    }
+    
+    if(/microsoft|msr|job|career/.test(txt)) {
+      return "At Microsoft Research, Zhengyan builds learning loops where language models act and reason in self-evolving environments. He's passionate about making LMs work efficiently and robustly for general tasks.";
+    }
+    
+    if(/contact|email|connect/.test(txt)) {
+      return "You can reach Zhengyan at zhengyan.shi.19@gmail.com or connect with him on LinkedIn, Twitter (@Zhengyan_Shi), or GitHub. He's always open to discussing research collaborations!";
+    }
+    
+    if(/background|education|phd/.test(txt)) {
+      return "Zhengyan has a PhD from UCL, MSc in Data Science with Distinction, and BSc in Mathematics with First Class Honours. He's also done internships at Cohere and Amazon before joining Microsoft Research.";
+    }
+    
+    return "I'm an AI assistant representing Zhengyan Shi, a researcher at Microsoft Research working on language models. Feel free to ask about his research, papers, teaching, or background! 🤖";
   }
 
   /* ---------- UI interactions ---------- */
@@ -500,6 +597,234 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   sendBtn.addEventListener('click',send);
   input.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
+})();
+    </script>
+
+    <!-- 👨‍🚀 Floating Astronaut Controller Script -->
+    <script>
+// filepath: inline-floating-astronaut
+(function () {
+  const astronaut = document.getElementById('astronaut');
+  const backgroundStars = document.querySelector('.background-stars');
+  const hint = document.getElementById('astronaut-hint');
+  
+  let astronautPos = { x: 20, y: 20 }; // percentage positions
+  let keys = {};
+  let isMoving = false;
+  let bgStars = [];
+  
+  // Initialize
+  function init() {
+    createBackgroundStars();
+    positionAstronaut();
+    
+    // Start the game loop
+    gameLoop();
+  }
+  
+  // Create subtle background stars
+  function createBackgroundStars() {
+    backgroundStars.innerHTML = '';
+    bgStars = [];
+    
+    for (let i = 0; i < 50; i++) {
+      const star = document.createElement('div');
+      star.className = 'bg-star';
+      
+      const size = Math.random() * 2 + 1; // 1-3px stars
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      const delay = Math.random() * 3;
+      
+      star.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}%;
+        top: ${y}%;
+        animation-delay: ${delay}s;
+      `;
+      
+      backgroundStars.appendChild(star);
+      bgStars.push({ element: star, x, y, size });
+    }
+  }
+  
+  // Position astronaut
+  function positionAstronaut() {
+    astronaut.style.left = astronautPos.x + '%';
+    astronaut.style.top = astronautPos.y + '%';
+  }
+  
+  // Create particle trail
+  function createParticle() {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    
+    const rect = astronaut.getBoundingClientRect();
+    particle.style.left = (rect.left + rect.width / 2) + 'px';
+    particle.style.top = (rect.top + rect.height / 2) + 'px';
+    
+    document.body.appendChild(particle);
+    
+    // Remove particle after animation
+    setTimeout(() => {
+      if (particle.parentNode) {
+        particle.parentNode.removeChild(particle);
+      }
+    }, 1000);
+  }
+  
+  // Movement system with page scrolling
+  function updateAstronautPosition() {
+    let moved = false;
+    const speed = 1.5; // percentage per frame
+    const scrollSpeed = 15; // pixels to scroll
+    
+    // Get current scroll position and page dimensions
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+    const documentHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    const documentWidth = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+    
+    if (keys['ArrowUp'] || keys['KeyW']) {
+      if (astronautPos.y <= 2) {
+        // At top boundary - scroll up if possible
+        if (scrollTop > 0) {
+          window.scrollBy(0, -scrollSpeed);
+          moved = true;
+        }
+      } else {
+        astronautPos.y = Math.max(2, astronautPos.y - speed);
+        moved = true;
+      }
+    }
+    
+    if (keys['ArrowDown'] || keys['KeyS']) {
+      if (astronautPos.y >= 85) {
+        // At bottom boundary - scroll down if possible
+        if (scrollTop < documentHeight - windowHeight) {
+          window.scrollBy(0, scrollSpeed);
+          moved = true;
+        }
+      } else {
+        astronautPos.y = Math.min(85, astronautPos.y + speed);
+        moved = true;
+      }
+    }
+    
+    if (keys['ArrowLeft'] || keys['KeyA']) {
+      if (astronautPos.x <= 2) {
+        // At left boundary - scroll left if possible
+        if (scrollLeft > 0) {
+          window.scrollBy(-scrollSpeed, 0);
+          moved = true;
+        }
+      } else {
+        astronautPos.x = Math.max(2, astronautPos.x - speed);
+        moved = true;
+      }
+    }
+    
+    if (keys['ArrowRight'] || keys['KeyD']) {
+      if (astronautPos.x >= 85) {
+        // At right boundary - scroll right if possible
+        if (scrollLeft < documentWidth - windowWidth) {
+          window.scrollBy(scrollSpeed, 0);
+          moved = true;
+        }
+      } else {
+        astronautPos.x = Math.min(85, astronautPos.x + speed);
+        moved = true;
+      }
+    }
+    
+    if (moved) {
+      positionAstronaut();
+      isMoving = true;
+      
+      // Create particle trail occasionally
+      if (Math.random() < 0.1) {
+        createParticle();
+      }
+      
+      // Hide hint when first moved
+      if (hint && !hint.style.display) {
+        hint.style.animation = 'hintFadeOut 0.5s ease-out forwards';
+        setTimeout(() => {
+          hint.style.display = 'none';
+        }, 500);
+      }
+    } else {
+      isMoving = false;
+    }
+  }
+  
+  // Enhance background star interaction
+  function updateBackgroundStars() {
+    if (!isMoving) return;
+    
+    const astronautRect = astronaut.getBoundingClientRect();
+    const astronautCenterX = astronautRect.left + astronautRect.width / 2;
+    const astronautCenterY = astronautRect.top + astronautRect.height / 2;
+    
+    bgStars.forEach(star => {
+      const starRect = star.element.getBoundingClientRect();
+      const starCenterX = starRect.left + starRect.width / 2;
+      const starCenterY = starRect.top + starRect.height / 2;
+      
+      const distance = Math.sqrt(
+        Math.pow(astronautCenterX - starCenterX, 2) + 
+        Math.pow(astronautCenterY - starCenterY, 2)
+      );
+      
+      if (distance < 50) {
+        // Enhanced star proximity effect
+        star.element.style.opacity = '0.6';
+        star.element.style.transform = 'scale(1.5)';
+        
+        setTimeout(() => {
+          star.element.style.opacity = '';
+          star.element.style.transform = '';
+        }, 200);
+      }
+    });
+  }
+  
+  // Game loop
+  function gameLoop() {
+    updateAstronautPosition();
+    updateBackgroundStars();
+    requestAnimationFrame(gameLoop);
+  }
+  
+  // Keyboard controls - immediate response
+  document.addEventListener('keydown', (e) => {
+    // Only respond to arrow keys and WASD
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
+      keys[e.code] = true;
+      e.preventDefault(); // Prevent scrolling
+    }
+  });
+  
+  document.addEventListener('keyup', (e) => {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(e.code)) {
+      keys[e.code] = false;
+    }
+  });
+  
+  // Handle window blur/focus
+  window.addEventListener('blur', () => {
+    keys = {}; // Clear all keys when window loses focus
+  });
+  
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
     </script>
   </body>
