@@ -33,9 +33,7 @@ body{
   font-family:var(--font-sans);
   line-height:1.6;
   -webkit-font-smoothing:antialiased;
-  -webkit-text-size-adjust:100%; /* Prevent iOS text size adjustment */
   transition: background 0.3s ease, color 0.3s ease;
-  overflow-x:hidden; /* Prevent horizontal scroll */
 }
 
 /* Fonts already loaded via Google Fonts CDN in HTML */
@@ -123,27 +121,6 @@ a:hover{opacity:.8}
 /* ---------- layout tweaks ---------- */
 main{padding:0 1rem}
 header table{width:100%}
-
-/* Base responsive typography using clamp() for fluid scaling */
-.name{font-size:clamp(2rem, 5vw, 2.5rem);}
-h2{font-size:clamp(1.3rem, 4vw, 1.8rem);}
-body, td, th, tr, p, a{font-size:clamp(14px, 2.5vw, 16px);}
-
-/* Responsive profile image */
-header td img{
-  width:clamp(200px, 25vw, 300px);
-  transition:all 0.3s ease;
-}
-
-/* Touch-friendly navigation links */
-header p:last-of-type a{
-  display:inline-block;
-  padding:0.5rem 1rem;
-  margin:0.25rem;
-  border-radius:var(--radius);
-  transition:all 0.2s ease;
-}
-
 @media(max-width:600px){
   header table{display:block}
   header td{display:block;width:100%!important;text-align:center}
@@ -261,81 +238,25 @@ main{
 }
 
 /* ---------- MOBILE RESPONSIVENESS ---------- */
-/* Tablet and small desktop */
-@media(max-width:1024px){
-  main{max-width:90%;padding:0 5%;}
-  .paper-image img{width:140px;}
-}
-
-/* Mobile landscape and small tablets */
 @media(max-width:768px){
   /* main container */
   main{max-width:95%;padding:0 2.5%;}
   
-  /* header layout - change from table to flexbox for better control */
-  header table{display:flex;flex-direction:column;align-items:center;}
-  header tr{display:flex;flex-direction:column-reverse;width:100%;}
-  header td{display:block;width:100%!important;text-align:center!important;}
-  header td:first-child{margin-top:1.5rem;order:2;}
-  header td:last-child{order:1;margin-bottom:1rem;}
+  /* header two-column table becomes stacked */
+  header table, header tr, header td{display:block;width:100%!important;text-align:center!important;}
+  header td:first-child{margin-bottom:1.5rem;}
   
-  /* profile image optimization - better responsive sizing */
-  header td img{
-    width:clamp(150px, 50vw, 250px)!important;
-    max-width:250px!important;
-    border-radius:50%!important;
-    box-shadow:0 4px 16px var(--shadow);
-  }
+  /* profile image optimization */
+  header td img{width:60%!important;max-width:200px;}
   
-  /* name and text scaling with better responsive typography */
-  .name{
-    font-size:clamp(1.8rem, 6vw, 2.5rem)!important;
-    margin-bottom:1rem!important;
-  }
+  /* name and text scaling */
+  .name{font-size:2rem!important;}
   body, td, th, tr, p, a{font-size:16px!important;line-height:1.7;}
-  h2{font-size:1.5rem!important;}
-  
-  /* better spacing for mobile */
-  header{padding:1rem!important;}
-  .content-section{margin-top:2rem!important;}
   
   /* paper cards mobile optimization */
-  .paper{
-    flex-direction:column;
-    align-items:center;
-    padding:1rem;
-    margin-bottom:1.5rem;
-  }
-  .paper-image{
-    margin-bottom:1rem;
-    width:100%;
-    text-align:center;
-    order:-1;
-  }
+  .paper{flex-direction:column;align-items:center;padding:1rem;}
+  .paper-image{margin-bottom:1rem;width:100%;text-align:center;}
   .paper-image img{width:120px;height:auto;}
-  .paper-content{text-align:center;}
-  
-  /* navigation links - better mobile spacing */
-  header p:last-of-type{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:0.5rem;
-    margin-top:1rem;
-  }
-  header p:last-of-type a{
-    padding:0.5rem 1rem;
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    margin:0.25rem;
-    transition:all 0.2s ease;
-  }
-  header p:last-of-type a:hover{
-    background:var(--accent);
-    color:white;
-    transform:translateY(-2px);
-  }
   
   /* AI agent positioning */
   #ai-agent{bottom:1rem;right:1rem;}
@@ -343,49 +264,14 @@ main{
   
   /* theme toggle */
   #theme-toggle{top:0.5rem;right:0.5rem;font-size:1.1rem;}
-  
-  /* news section mobile optimization */
-  .news-item{
-    flex-direction:column;
-    gap:0.5rem;
-    text-align:center;
-  }
-  .news-date{align-self:center;}
 }
 
 @media(max-width:480px){
   /* extra small screens */
-  main{padding:0 1rem;}
-  
-  .name{font-size:clamp(1.5rem, 8vw, 2rem)!important;}
+  .name{font-size:1.8rem!important;}
   body, td, th, tr, p, a{font-size:15px!important;}
-  h2{font-size:1.3rem!important;}
-  
-  /* profile image for very small screens */
-  header td img{
-    width:clamp(120px, 40vw, 180px)!important;
-    max-width:180px!important;
-  }
-  
-  /* more compact spacing */
-  header{padding:0.5rem!important;}
-  .content-section{margin-top:1.5rem!important;}
   .paper{padding:0.8rem;}
-  .paper-image img{width:100px;}
-  
-  /* navigation links more compact */
-  header p:last-of-type a{
-    padding:0.4rem 0.8rem;
-    font-size:0.9rem;
-  }
-  
-  /* AI agent adjustments */
   #agent-chat{width:90vw;max-width:280px;}
-  .agent-avatar{width:2rem;height:2rem;font-size:1.2rem;}
-  
-  /* lists and text content */
-  ul{padding-left:1rem;}
-  li{margin-bottom:0.5rem;}
 }
 
 /* ---------- AI RESEARCH AGENT ---------- */
@@ -591,30 +477,5 @@ main{
     font-size: 0.8rem;
     padding: 0.4rem 0.8rem;
     max-width: 90%;
-  }
-}
-
-/* ---------- MOBILE TOUCH OPTIMIZATIONS ---------- */
-/* Improve touch targets for mobile */
-@media (hover: none) and (pointer: coarse) {
-  a, button, .agent-avatar, #theme-toggle {
-    min-height: 44px; /* iOS/Android recommendation */
-    min-width: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  /* Make navigation links more touch-friendly */
-  header p:last-of-type a {
-    padding: 0.75rem 1.25rem;
-    margin: 0.5rem 0.25rem;
-    font-size: 0.9rem;
-  }
-  
-  /* Larger theme toggle for touch */
-  #theme-toggle {
-    font-size: 1.5rem;
-    padding: 0.5rem;
   }
 }

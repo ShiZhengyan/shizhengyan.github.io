@@ -414,7 +414,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="chat-messages"></div>
         <div class="chat-input">
           <textarea rows="1" placeholder="Ask me about my research…"></textarea>
-          <button class="key-btn" aria-label="Set API key" title="Configure OpenRouter API key">🔑</button>
           <button class="send-btn" aria-label="Send">➤</button>
         </div>
       </div>
@@ -432,7 +431,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatBox     = document.getElementById('agent-chat');
   const msgArea     = chatBox.querySelector('.chat-messages');
   const input       = chatBox.querySelector('textarea');
-  const keyBtn      = chatBox.querySelector('.key-btn');
   const sendBtn     = chatBox.querySelector('.send-btn');
 
   const quotes = [
@@ -453,56 +451,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchLLMResponse(q){
     /* ---------- Enhanced context about Zhengyan Shi ---------- */
-    const systemPrompt = `You are an AI assistant representing Zhengyan Shi, a Senior Researcher at Microsoft Research.
+    const contextPrompt = `You are an AI assistant representing Zhengyan Shi, a Senior Researcher at Microsoft Research. Here's information about him:
+
 BACKGROUND:
-- Senior Researcher at MSR; PhD in CS (UCL); MSc Data Science (Distinction, UCL); BSc Mathematics (First Class).
-- Interned at Cohere (London) and Amazon (London & Seattle).
+- Senior Researcher at Microsoft Research (MSR)
+- PhD in Computer Science from University College London (UCL)
+- MSc in Data Science (Statistics) with Distinction from UCL
+- BSc in Mathematics with First Class Honours from University of Liverpool and Xi'an Jiaotong-Liverpool University
+- Research internships at Cohere (London) and Amazon (London & Seattle)
+
 RESEARCH FOCUS:
-- Teaching LMs to code; learning loops where LMs act/reason in scalable, self-evolving environments.
-- LM post-training, instruction tuning, interactive systems, prompt-based fine-tuning.
-- Make LMs efficient, robust, and general.
+- Teaching language models (LMs) to code
+- Building learning loops where LMs act and reason in scalable, self-evolving environments
+- Language model post-training and instruction tuning
+- Interactive systems and prompt-based fine-tuning
+- Making language models work efficiently, robustly, and generally
+
 RECENT WORK:
-- Likelihood over-optimisation in DAAs (2024 preprint)
-- Instruction Tuning With Loss Over Instructions (NeurIPS 2024)
-- DePT: Decomposed Prompt Tuning (ICLR 2024)
-- Don't Stop Pretraining? (NeurIPS 2023)
-Keep replies concise (1–3 sentences), friendly, and on-topic.`;
+- "Understanding Likelihood Over-optimisation in Direct Alignment Algorithms" (2024 preprint)
+- "Instruction Tuning With Loss Over Instructions" (NeurIPS 2024)
+- "DePT: Decomposed Prompt Tuning for Parameter-Efficient Fine-tuning" (ICLR 2024)
+- "Don't Stop Pretraining? Make Prompt-based Fine-tuning Powerful Learner" (NeurIPS 2023)
 
-    /* ---------- Prefer OpenRouter if a key is configured ---------- */
-    const openrouterKey = localStorage.getItem('openrouter_key');
-    const model = 'meta-llama/llama-3.1-8b-instruct:free'; // Change to any OpenRouter model you prefer
+Question: ${q}
 
-    if (openrouterKey) {
+Please respond as if you're an AI assistant representing Zhengyan, providing helpful information about his research, background, or related topics. Keep responses concise (1-3 sentences) and friendly.`;
+
+    /* ---------- Multiple free LLM APIs ---------- */
+    const apis = [
+      // Hugging Face Inference API (free tier)
+      {
+        url: 'https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs: contextPrompt })
+      },
+      
+      // Alternative free API
+      {
+        url: `https://api.affiliateplus.xyz/api/chatbot?message=${encodeURIComponent(contextPrompt)}&owner=zhengyan&botname=ResearchBot`
+      },
+      
+      // Another free option
+      {
+        url: 'https://api.cohere.ai/v1/generate',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'command-light',
+          prompt: contextPrompt,
+          max_tokens: 200,
+          temperature: 0.7
+        })
+      }
+    ];
+
+    /* ---------- Try multiple APIs ---------- */
+    for (const api of apis) {
       try {
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${openrouterKey}`,
-            // Optional, helps attribute traffic in OpenRouter dashboard
-            'X-Title': 'ZhengyanShi Personal Site'
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: q }
-            ],
-            temperature: 0.7,
-            max_tokens: 220
-          })
+        const response = await fetch(api.url, {
+          method: api.body ? 'POST' : 'GET',
+          headers: api.headers || {},
+          body: api.body
         });
-
-        if (res.ok) {
-          const data = await res.json();
-          const answer = data?.choices?.[0]?.message?.content?.trim();
-          if (answer) return answer.substring(0, 500);
-        } else {
-          const errText = await res.text().catch(()=> '');
-          console.warn('OpenRouter error', res.status, errText);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Handle different response formats
+          let answer = '';
+          if (data.generated_text) answer = data.generated_text;
+          else if (data.message) answer = data.message;
+          else if (data.generations?.[0]?.text) answer = data.generations[0].text;
+          else if (Array.isArray(data) && data[0]?.generated_text) answer = data[0].generated_text;
+          
+          if (answer && answer.trim()) {
+            return answer.trim().substring(0, 300); // Limit response length
+          }
         }
-      } catch (e) {
-        console.warn('OpenRouter request failed:', e);
+      } catch (error) {
+        console.log('API attempt failed, trying next...');
+        continue;
       }
     }
 
@@ -533,10 +560,7 @@ Keep replies concise (1–3 sentences), friendly, and on-topic.`;
       return "Zhengyan has a PhD from UCL, MSc in Data Science with Distinction, and BSc in Mathematics with First Class Honours. He's also done internships at Cohere and Amazon before joining Microsoft Research.";
     }
     
-  // If no key is set or OpenRouter failed, fall back to a local summary
-  const keyHint = openrouterKey ? '' : ' Tip: click the 🔑 to add an OpenRouter API key for live answers.';
-  return ("I'm an AI assistant representing Zhengyan Shi, a researcher at Microsoft Research working on language models. " +
-      "Ask about his research, papers, teaching, or background! 🤖" + keyHint).trim();
+    return "I'm an AI assistant representing Zhengyan Shi, a researcher at Microsoft Research working on language models. Feel free to ask about his research, papers, teaching, or background! 🤖";
   }
 
   /* ---------- UI interactions ---------- */
@@ -573,17 +597,6 @@ Keep replies concise (1–3 sentences), friendly, and on-topic.`;
   };
   sendBtn.addEventListener('click',send);
   input.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
-
-  // Minimal API key configurator (stored locally in your browser)
-  keyBtn.addEventListener('click', ()=>{
-    const current = localStorage.getItem('openrouter_key')||'';
-    const entered = prompt('Enter your OpenRouter API key (stored locally in this browser):', current);
-    if (entered !== null) {
-      const trimmed = entered.trim();
-      if (trimmed) localStorage.setItem('openrouter_key', trimmed);
-      else localStorage.removeItem('openrouter_key');
-    }
-  });
 })();
     </script>
 
